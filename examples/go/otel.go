@@ -57,40 +57,31 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 
 	traceExporter, err := otlptrace.New(ctx, otlptracehttp.NewClient())
 	if err != nil {
-		return nil, err
-	}
-
-	tracerProvider := trace.NewTracerProvider(trace.WithBatcher(traceExporter))
-	if err != nil {
 		handleErr(err)
 		return
 	}
+
+	tracerProvider := trace.NewTracerProvider(trace.WithBatcher(traceExporter))
 	shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
 	otel.SetTracerProvider(tracerProvider)
 
 	metricExporter, err := otlpmetrichttp.New(ctx)
 	if err != nil {
-		return nil, err
-	}
-
-	meterProvider := metric.NewMeterProvider(metric.WithReader(metric.NewPeriodicReader(metricExporter)))
-	if err != nil {
 		handleErr(err)
 		return
 	}
+
+	meterProvider := metric.NewMeterProvider(metric.WithReader(metric.NewPeriodicReader(metricExporter)))
 	shutdownFuncs = append(shutdownFuncs, meterProvider.Shutdown)
 	otel.SetMeterProvider(meterProvider)
 
 	logExporter, err := otlploghttp.New(ctx, otlploghttp.WithInsecure())
 	if err != nil {
-		return nil, err
-	}
-
-	loggerProvider := log.NewLoggerProvider(log.WithProcessor(log.NewBatchProcessor(logExporter)))
-	if err != nil {
 		handleErr(err)
 		return
 	}
+
+	loggerProvider := log.NewLoggerProvider(log.WithProcessor(log.NewBatchProcessor(logExporter)))
 	shutdownFuncs = append(shutdownFuncs, loggerProvider.Shutdown)
 	global.SetLoggerProvider(loggerProvider)
 
